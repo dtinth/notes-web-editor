@@ -1,7 +1,7 @@
 <template>
-  <StatusItem @click="onClick" :clickable="!!clickAction">{{
-    status
-  }}</StatusItem>
+  <StatusItem @click="onClick" :clickable="!!clickAction">
+    {{ status }}
+  </StatusItem>
 </template>
 
 <script lang="ts">

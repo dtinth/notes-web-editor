@@ -4,6 +4,7 @@
       class="flex-none flex items-center px-2"
       @click="$emit('click')"
       :is="clickable ? 'button' : 'span'"
+      :title="title"
     >
       <span><slot /></span>
     </component>
@@ -16,6 +17,7 @@ import { computed, defineComponent } from 'vue'
 export default defineComponent({
   props: {
     alignment: String,
+    title: String,
     clickable: Boolean,
   },
   emits: ['click'],
