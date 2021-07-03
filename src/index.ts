@@ -6,6 +6,9 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import HomePage from './HomePage.vue'
 import NotePage from './NotePage.vue'
 import { notesApiClient } from './NotesApiClient'
+import { Buffer } from 'buffer'
+
+Object.assign(window, { Buffer })
 
 setup({
   theme: {

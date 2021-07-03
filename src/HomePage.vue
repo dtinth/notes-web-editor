@@ -31,13 +31,42 @@
         </div>
       </div>
     </div>
+
+    <!-- List of notes grouped by section -->
+    <section
+      class="
+        mx-2
+        my-2
+        bg-#252423
+        rounded
+        border border-#555453
+        shadow
+        overflow-hidden
+      "
+      v-for="(section, index) of sections"
+      :key="index"
+    >
+      <h2 class="text-#8b8685 font-bold py-1 px-2 bg-glossy">
+        <span>{{ section.title }}</span>
+      </h2>
+      <ul class="px-2 py-1">
+        <li v-for="note of section.notes" :key="note.id" class="my-1">
+          <router-link :to="'/notes/' + note.id">
+            <h3>{{ note.title }}</h3>
+            <p class="text-sm text-#8b8685">{{ note.excerpt }}</p>
+          </router-link>
+        </li>
+      </ul>
+    </section>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { computed, defineComponent, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Button from './Button.vue'
+import { db, NoteModel } from './db'
+import { parseNote } from './NoteInfoParser'
 
 export default defineComponent({
   components: {
@@ -45,6 +74,7 @@ export default defineComponent({
   },
   setup() {
     const search = ref('')
+    const localDocs = ref<PouchDB.Core.AllDocsResponse<NoteModel> | null>(null)
     const router = useRouter()
     const createNote = () => {
       const id =
@@ -53,9 +83,26 @@ export default defineComponent({
         (10000 + 10000 * Math.random()).toString().slice(-4)
       router.push(`/notes/${id}`)
     }
+    onMounted(async () => {
+      const docs = await db.allDocs({ include_docs: true })
+      localDocs.value = docs
+    })
+    const sections = computed(() => {
+      const localNotes = localDocs.value?.rows.map((row) => ({
+        ...parseNote(row.doc!.contents),
+        id: row.id,
+      }))
+      return [
+        {
+          title: 'Local notes',
+          notes: localNotes,
+        },
+      ]
+    })
     return {
       search,
       createNote,
+      sections,
     }
   },
 })
