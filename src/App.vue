@@ -1,5 +1,5 @@
 <template>
-  <div>meow</div>
+  <router-view></router-view>
 </template>
 
 <script lang="ts">
@@ -12,8 +12,5 @@ export default defineComponent({
 </script>
 
 <style>
-body {
-  background: #353433;
-  color: #e9e8e7;
-}
+@import "./App.css";
 </style>
