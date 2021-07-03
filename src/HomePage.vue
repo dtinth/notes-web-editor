@@ -53,7 +53,14 @@
         <li v-for="note of section.notes" :key="note.id">
           <router-link
             :to="'/notes/' + note.id"
-            class="px-2 py-2 block border-t border-#454443 hover:bg-#454443"
+            class="
+              px-2
+              py-2
+              block
+              border-t border-#353433
+              bg-#090807
+              hover:bg-#252423
+            "
           >
             <h3>{{ note.title }}</h3>
             <p class="text-sm text-#8b8685">{{ note.excerpt }}</p>
@@ -112,10 +119,16 @@ export default defineComponent({
           },
         ]
       }
-      const localNotes = localDocs.value?.rows.map((row) => ({
-        ...parseNote(row.doc!.contents),
-        id: row.id,
-      }))
+      const localNotes = localDocs.value?.rows
+        .sort(
+          (a, b) =>
+            Date.parse(b.doc!.lastModifiedAt) -
+            Date.parse(a.doc!.lastModifiedAt),
+        )
+        .map((row) => ({
+          ...parseNote(row.doc!.contents),
+          id: row.id,
+        }))
       return [
         {
           title: 'Local notes',
