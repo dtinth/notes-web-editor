@@ -3,10 +3,16 @@ import { getGoogleLoginStatus } from './GoogleSignIn'
 
 export const notesApiClient = axios.create({})
 
+export class UserUnauthenticatedError extends Error {
+  constructor() {
+    super('User is not authenticated')
+  }
+}
+
 notesApiClient.interceptors.request.use(async (config) => {
   const loginStatus = await getGoogleLoginStatus()
   if (!loginStatus) {
-    throw new Error('Not signed in to Google')
+    throw new UserUnauthenticatedError()
   }
   const token = loginStatus.idToken
   ;(config.headers ??= {}).authorization ??= `Bearer ${token}`

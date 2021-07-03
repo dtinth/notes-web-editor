@@ -53,6 +53,12 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       return
     }
 
+    if (req.query.action === 'search') {
+      const response = await notesApi.post('/search', req.body)
+      res.json(response.data)
+      return
+    }
+
     res.status(400).send('Unknown action')
   } catch (error) {
     console.error(error)

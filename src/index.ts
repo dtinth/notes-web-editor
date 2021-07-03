@@ -5,7 +5,7 @@ import { setup } from 'twind/shim'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import HomePage from './HomePage.vue'
 import NotePage from './NotePage.vue'
-import { notesApiClient } from './NotesAPIClient'
+import { notesApiClient } from './NotesApiClient'
 
 setup({
   theme: {

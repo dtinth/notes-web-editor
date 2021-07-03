@@ -60,6 +60,7 @@ import { useRoute } from 'vue-router'
 import { db, NoteModel } from './db'
 import Button from './Button.vue'
 import { DocumentSaver } from './DocumentSaver'
+import { notesApiClient, UserUnauthenticatedError } from './NotesApiClient'
 
 export default defineComponent({
   components: {
@@ -115,7 +116,7 @@ function getNoteViewModel(id: string) {
       note.current = getNoteViewModel(doc)
     } catch (error) {
       if (isNotFound(error)) {
-        handleNotFound()
+        await handleNotFound()
         return
       }
       showError(`Unable to load the note: ${error}`)
@@ -151,14 +152,48 @@ function getNoteViewModel(id: string) {
   }
 
   async function handleNotFound() {
-    note.current = {
-      readonly: true,
-      value: '',
-      placeholder:
-        `Unable to find the requested note. ` +
-        `Unable to search the note on the server because you are not logged in. ` +
-        `You can create this note locally, but if a note exists on the server with the same ID, there will be a conflict when synchronizing.`,
-      needsCreation: { create },
+    const showMessage = (m: string, canCreate = false) => {
+      note.current = {
+        readonly: true,
+        value: '',
+        placeholder: m,
+        ...(canCreate ? { needsCreation: { create } } : {}),
+      }
+    }
+    try {
+      showMessage('Looking for an existing note on the server...')
+      const { data } = await notesApiClient.post('/api/notes?action=sync', {
+        id,
+      })
+      if (typeof data.contents === 'string') {
+        await db.put({
+          _id: id,
+          contents: data.contents,
+          lastModifiedAt: new Date().toJSON(),
+          lastAccessedAt: new Date().toJSON(),
+          lastSuccessfulSynchronization: {
+            synchronizedAt: new Date().toJSON(),
+            contentHash: data.hash,
+          },
+        })
+        await load()
+        return
+      }
+      showMessage(
+        `Unable to find the requested note, and the note with requested ID does not exist on the server. You can create this note locally.`,
+        true,
+      )
+    } catch (error) {
+      if (error instanceof UserUnauthenticatedError) {
+        showMessage(
+          `Unable to find the requested note. ` +
+            `Also unable to look for an existing note on the server because you are not yet signed in. ` +
+            `You can create this note locally, but if a note exists on the server with the same ID, there will be a conflict when synchronizing.`,
+          true,
+        )
+        return
+      }
+      throw error
     }
   }
 
