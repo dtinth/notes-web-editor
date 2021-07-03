@@ -13,12 +13,12 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/icon-192.png',
+            src: '/notes-editor_192.png',
             type: 'image/png',
             sizes: '192x192',
           },
           {
-            src: '/icon-512.png',
+            src: '/notes-editor_512.png',
             type: 'image/png',
             sizes: '512x512',
           },
