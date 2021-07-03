@@ -7,7 +7,12 @@
     <title>Notes editor</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app" class="pb-6"></div>
+    <div class="fixed bottom-0 inset-x-0 bg-#090807 h-6 text-sm flex">
+      <div id="status-left"></div>
+      <div class="flex-auto"></div>
+      <div id="status-right"></div>
+    </div>
     <script>
       // https://github.com/vitejs/vite/issues/2618#issuecomment-820919951
       global = globalThis
