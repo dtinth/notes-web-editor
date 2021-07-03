@@ -3,7 +3,7 @@ import { OAuth2Client } from 'google-auth-library'
 import cors from 'cors'
 import axios from 'axios'
 
-const ALLOWED_EMAILS = process.env.ALLOWED_EMAILS.split(',')
+const ALLOWED_EMAILS = (process.env.ALLOWED_EMAILS ?? '').split(',')
 const CLIENT_ID =
   '347735770628-lto200027l05noe9tkilnpqnefn9e6g3.apps.googleusercontent.com'
 const client = new OAuth2Client(CLIENT_ID)
@@ -39,6 +39,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     })
     const payload = ticket.getPayload()
     if (
+      !payload ||
       !payload.email_verified ||
       !payload.email ||
       !ALLOWED_EMAILS.includes(payload.email)
