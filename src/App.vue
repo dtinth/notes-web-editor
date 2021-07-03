@@ -14,7 +14,3 @@ export default defineComponent({
   components: { PWAStatus, GoogleSignInStatus },
 })
 </script>
-
-<style>
-@import './App.css';
-</style>
