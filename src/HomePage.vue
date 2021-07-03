@@ -23,7 +23,7 @@
               placeholder-#8b8685
             "
             placeholder="Search for notes"
-            v-model="search"
+            v-model="search.text"
           />
         </div>
         <div class="flex-none ml-2">
@@ -49,9 +49,12 @@
       <h2 class="text-#8b8685 font-bold py-1 px-2 bg-glossy">
         <span>{{ section.title }}</span>
       </h2>
-      <ul class="px-2 py-1">
-        <li v-for="note of section.notes" :key="note.id" class="my-1">
-          <router-link :to="'/notes/' + note.id">
+      <ul>
+        <li v-for="note of section.notes" :key="note.id">
+          <router-link
+            :to="'/notes/' + note.id"
+            class="px-2 py-2 block border-t border-#454443 hover:bg-#454443"
+          >
             <h3>{{ note.title }}</h3>
             <p class="text-sm text-#8b8685">{{ note.excerpt }}</p>
           </router-link>
@@ -62,19 +65,26 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, ref } from 'vue'
+import { computed, defineComponent, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Button from './Button.vue'
 import { db, NoteModel } from './db'
 import { parseNote } from './NoteInfoParser'
+import { notesApiClient } from './NotesApiClient'
 
 export default defineComponent({
   components: {
     Button,
   },
   setup() {
-    const search = ref('')
     const localDocs = ref<PouchDB.Core.AllDocsResponse<NoteModel> | null>(null)
+    const recent = ref<{ id: string; label: string }[] | null>(null)
+    const search = reactive({
+      text: '',
+      displayedId: 0,
+      result: [] as NoteItem[],
+      nextId: 1,
+    })
     const router = useRouter()
     const createNote = () => {
       const id =
@@ -87,7 +97,21 @@ export default defineComponent({
       const docs = await db.allDocs({ include_docs: true })
       localDocs.value = docs
     })
-    const sections = computed(() => {
+    onMounted(async () => {
+      const { data: docs } = await notesApiClient.post(
+        '/api/notes?action=recent',
+      )
+      recent.value = docs
+    })
+    const sections = computed((): NoteSection[] => {
+      if (search.result.length > 0) {
+        return [
+          {
+            title: 'Search result',
+            notes: search.result,
+          },
+        ]
+      }
       const localNotes = localDocs.value?.rows.map((row) => ({
         ...parseNote(row.doc!.contents),
         id: row.id,
@@ -95,10 +119,33 @@ export default defineComponent({
       return [
         {
           title: 'Local notes',
-          notes: localNotes,
+          notes: localNotes ?? [],
+        },
+        {
+          title: 'Recent notes',
+          notes:
+            recent.value?.map(({ id, label }) => ({
+              id,
+              title: label,
+              excerpt: '',
+            })) ?? [],
         },
       ]
     })
+    watch(
+      () => search.text,
+      async (text) => {
+        const id = search.nextId++
+        const data = text.trim()
+          ? (await notesApiClient.post('/api/notes?action=search', { q: text }))
+              .data
+          : []
+        if (id > search.displayedId) {
+          search.displayedId = id
+          search.result = data
+        }
+      },
+    )
     return {
       search,
       createNote,
@@ -106,6 +153,17 @@ export default defineComponent({
     }
   },
 })
+
+type NoteSection = {
+  title: string
+  notes: NoteItem[]
+}
+
+type NoteItem = {
+  id: string
+  title: string
+  excerpt: string
+}
 </script>
 
 <style>

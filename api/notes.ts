@@ -60,6 +60,19 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       return
     }
 
+    if (req.query.action === 'recent') {
+      const response = await notesApi.get('/sidebar')
+      const recent = response.data
+        .filter((x) => ['uncommitted', 'recent'].includes(x.id))
+        .flatMap((x) => {
+          return x.children
+            .filter((x) => x.noteId)
+            .map((x) => ({ id: x.noteId, label: x.label }))
+        })
+      res.json(recent)
+      return
+    }
+
     res.status(400).send('Unknown action')
   } catch (error) {
     console.error(error)
