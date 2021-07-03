@@ -54,12 +54,14 @@
           <router-link
             :to="'/notes/' + note.id"
             class="
+              m-2
               px-2
               py-2
               block
-              border-t border-#353433
-              bg-#090807
-              hover:bg-#252423
+              rounded
+              bg-#353433
+              hover:bg-#454443
+              shadow
             "
           >
             <h3>{{ note.title }}</h3>
