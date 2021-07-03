@@ -27,21 +27,7 @@
           />
         </div>
         <div class="flex-none ml-2">
-          <button
-            class="
-              bg-bevel
-              rounded
-              border border-#454443
-              hover:border-#555453
-              active:border-#8b8685
-              py-1
-              px-4
-              shadow
-            "
-            @click="createNote"
-          >
-            Create
-          </button>
+          <Button @click="createNote">Create</Button>
         </div>
       </div>
     </div>
@@ -51,8 +37,12 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import Button from './Button.vue'
 
 export default defineComponent({
+  components: {
+    Button,
+  },
   setup() {
     const search = ref('')
     const router = useRouter()
