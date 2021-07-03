@@ -176,7 +176,7 @@ function getNoteViewModel(id: string) {
     try {
       showMessage('Looking for an existing note on the server...')
       const result = await synchronizeNote(id)
-      if (result) {
+      if (result === 'loaded') {
         await load()
       } else {
         showMessage(
