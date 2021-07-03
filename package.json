@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "@types/pouchdb": "^6.4.0",
+    "pouchdb": "^7.2.2",
     "twind": "^0.16.16",
     "vue": "^3.0.5",
     "vue-router": "4"

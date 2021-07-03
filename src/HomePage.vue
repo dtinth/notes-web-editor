@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Using Tailwind CSS -->
     <div class="px-2 py-1">
       <h1 class="text-#8b8685 font-bold">Notes</h1>
     </div>
@@ -21,6 +20,7 @@
               py-1
               px-2
               shadow
+              placeholder-#8b8685
             "
             placeholder="Search for notes"
             v-model="search"
