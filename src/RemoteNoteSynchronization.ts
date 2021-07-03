@@ -52,6 +52,7 @@ async function performSynchronization(id: string): Promise<SynchronizeResult> {
         }
       : undefined,
   })
+  console.log(`${logPrefix}Server said: ${data.status}`)
 
   if (typeof data.contents !== 'string') {
     if (!localNote) {
