@@ -15,6 +15,9 @@ export default defineComponent({
     const status = ref('…')
     const clickAction = ref<(() => void) | null>(null)
     onMounted(() => {
+      status.value = navigator.serviceWorker?.controller
+        ? 'PWA active'
+        : 'Not PWA'
       const updateSW = registerSW({
         onNeedRefresh() {
           status.value = 'Refresh to update'
