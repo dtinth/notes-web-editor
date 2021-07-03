@@ -5,6 +5,7 @@ import { setup } from 'twind/shim'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import HomePage from './HomePage.vue'
 import NotePage from './NotePage.vue'
+import { notesApiClient } from './NotesAPIClient'
 
 setup({
   theme: {
@@ -78,3 +79,7 @@ const router = createRouter({
 })
 
 createApp(App).use(router).mount('#app')
+
+Object.assign(window, {
+  notesApiClient,
+})
