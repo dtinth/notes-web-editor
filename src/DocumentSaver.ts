@@ -3,6 +3,7 @@ export class DocumentSaver<T> {
   private savingIsInProgress = false
   private getNewDoc?: (doc: T) => T
   constructor(private db: PouchDB.Database<T>, private docId: string) {}
+  public onSave = () => {}
   requestToSave(getNewDoc: (doc: T) => T) {
     this.needsSaving = true
     this.getNewDoc = getNewDoc
@@ -30,6 +31,7 @@ export class DocumentSaver<T> {
         result.rev,
         this.docId,
       )
+      this.onSave()
     } finally {
       this.savingIsInProgress = false
       await this.check()

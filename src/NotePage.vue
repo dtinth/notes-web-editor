@@ -61,6 +61,8 @@ import { db, NoteModel } from './db'
 import Button from './Button.vue'
 import { DocumentSaver } from './DocumentSaver'
 import { notesApiClient, UserUnauthenticatedError } from './NotesApiClient'
+import { synchronizeNote } from './RemoteNoteSynchronization'
+import { isNotFound } from './PouchDBUtils'
 
 export default defineComponent({
   components: {
@@ -106,7 +108,7 @@ function getNoteViewModel(id: string) {
     current: {
       readonly: true,
       value: '',
-      placeholder: `Searching for ${id}...`,
+      placeholder: `Loading note ${id}...`,
     },
   })
 
@@ -130,6 +132,17 @@ function getNoteViewModel(id: string) {
       value: initialDoc.contents,
     })
     const saver = new DocumentSaver<NoteModel>(db, id)
+    saver.onSave = () => {
+      synchronizeNote(id)
+    }
+
+    // We need to reload due to new contents
+    synchronizeNote(id).then((result) => {
+      if (result === 'loaded') {
+        load()
+      }
+    })
+
     watch(
       () => viewModel.value,
       (newValue) => {
@@ -162,27 +175,15 @@ function getNoteViewModel(id: string) {
     }
     try {
       showMessage('Looking for an existing note on the server...')
-      const { data } = await notesApiClient.post('/api/notes?action=sync', {
-        id,
-      })
-      if (typeof data.contents === 'string') {
-        await db.put({
-          _id: id,
-          contents: data.contents,
-          lastModifiedAt: new Date().toJSON(),
-          lastAccessedAt: new Date().toJSON(),
-          lastSuccessfulSynchronization: {
-            synchronizedAt: new Date().toJSON(),
-            contentHash: data.hash,
-          },
-        })
+      const result = await synchronizeNote(id)
+      if (result) {
         await load()
-        return
+      } else {
+        showMessage(
+          `Unable to find the requested note, and the note with requested ID does not exist on the server. You can create this note locally.`,
+          true,
+        )
       }
-      showMessage(
-        `Unable to find the requested note, and the note with requested ID does not exist on the server. You can create this note locally.`,
-        true,
-      )
     } catch (error) {
       if (error instanceof UserUnauthenticatedError) {
         showMessage(
@@ -221,10 +222,6 @@ function getNoteViewModel(id: string) {
   load()
 
   return note
-}
-
-function isNotFound(error: any): error is { status: 404 } {
-  return error.status === 404
 }
 </script>
 

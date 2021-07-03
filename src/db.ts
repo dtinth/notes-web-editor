@@ -6,7 +6,8 @@ export type NoteModel = {
   lastModifiedAt: string
   lastSuccessfulSynchronization?: {
     synchronizedAt: string
-    contentHash: string
+    contents: string
+    hash: string
   }
 }
 
