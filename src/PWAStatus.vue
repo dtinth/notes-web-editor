@@ -13,7 +13,7 @@ export default defineComponent({
   components: { StatusItem },
   setup() {
     const status = ref('…')
-    const clickAction = ref<() => void | null>(null)
+    const clickAction = ref<(() => void) | null>(null)
     onMounted(() => {
       const updateSW = registerSW({
         onNeedRefresh() {
