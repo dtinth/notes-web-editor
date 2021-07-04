@@ -1,4 +1,5 @@
 import { computed, reactive, Ref, watch } from 'vue'
+import { Router } from 'vue-router'
 import { db, NoteModel } from './db'
 import { DocumentSaver } from './DocumentSaver'
 import { UserUnauthenticatedError } from './NotesApiClient'
@@ -10,6 +11,7 @@ export type ViewModel = {
   placeholder?: string
   value: string
   needsCreation?: { create: () => {} }
+  removeLocal?: (router: Router) => void
 }
 
 export function useNoteViewModel(id: Ref<string>) {
@@ -49,10 +51,27 @@ function getNoteViewModel(id: string): { current: ViewModel } {
     }
   }
 
+  async function removeLocal(router: Router) {
+    const doc = await db.get(id)
+    const safeToRemove =
+      doc.lastSuccessfulSynchronization?.contents === doc.contents
+    const result = confirm(
+      (safeToRemove
+        ? '✅ Note has been synchronized with the server'
+        : `⚠️ Note has not been synchronized with the server. Removing local copy may result in loss of data`) +
+        '\n\nAre you sure you want to delete the local copy of this note?',
+    )
+    if (result) {
+      router.replace('/')
+      await db.remove(doc)
+    }
+  }
+
   function getNoteViewModel(initialDoc: NoteModel & PouchDB.Core.GetMeta) {
     const viewModel = reactive({
       readonly: false,
       value: initialDoc.contents,
+      removeLocal,
     })
     const saver = new DocumentSaver<NoteModel>(db, id)
     saver.onSave = () => {

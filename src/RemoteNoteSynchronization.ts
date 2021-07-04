@@ -1,4 +1,5 @@
 import delay from 'delay'
+import { computed, reactive, Ref } from 'vue'
 import { db } from './db'
 import { notesApiClient } from './NotesApiClient'
 import { isNotFound } from './PouchDBUtils'
@@ -9,7 +10,19 @@ const activeSynchronizations: Record<
   string,
   Promise<SynchronizeResult> | undefined
 > = {}
+
 let needsResynchronizationAfterwards: Record<string, boolean> = {}
+
+export type SynchronizationStatus = {
+  state: 'synchronizing' | 'error' | SynchronizeResult
+}
+const synchronizationStatus = reactive<Record<string, SynchronizationStatus>>(
+  {},
+)
+
+export function useSynchronizationStatus(id: Ref<string>) {
+  return computed(() => synchronizationStatus[id.value])
+}
 
 export async function synchronizeNote(id: string): Promise<SynchronizeResult> {
   const active = activeSynchronizations[id]
@@ -20,8 +33,14 @@ export async function synchronizeNote(id: string): Promise<SynchronizeResult> {
 
   const promise = performSynchronization(id)
   activeSynchronizations[id] = promise
+  synchronizationStatus[id] = { state: 'synchronizing' }
   try {
-    return await promise
+    const result = await promise
+    synchronizationStatus[id] = { state: result }
+    return result
+  } catch (error) {
+    synchronizationStatus[id] = { state: 'error' }
+    throw error
   } finally {
     ;(async () => {
       await delay(2500)

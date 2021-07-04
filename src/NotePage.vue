@@ -51,6 +51,13 @@
         >Create Note Locally</Button
       >
     </div>
+    <StatusItem
+      v-if="synchronizationStatus"
+      @click="data.removeLocal?.($router)"
+      :clickable="!!data.removeLocal"
+    >
+      {{ synchronizationStatus.state }}
+    </StatusItem>
   </div>
 </template>
 
@@ -59,16 +66,20 @@ import { computed, defineComponent, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import Button from './Button.vue'
 import { useNoteViewModel } from './NoteHook'
+import { useSynchronizationStatus } from './RemoteNoteSynchronization'
+import StatusItem from './StatusItem.vue'
 
 export default defineComponent({
   components: {
     Button,
+    StatusItem,
   },
   setup() {
     const route = useRoute()
     const textarea = ref()
     const id = computed(() => route.params.id as string)
     const dataRef = useNoteViewModel(id)
+    const synchronizationStatus = useSynchronizationStatus(id)
     const data = computed(() => dataRef.value.current)
     watch(
       () => data.value.readonly,
@@ -78,7 +89,7 @@ export default defineComponent({
         }
       },
     )
-    return { id, data, textarea }
+    return { id, data, textarea, synchronizationStatus }
   },
 })
 </script>
