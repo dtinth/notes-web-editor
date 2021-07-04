@@ -19,6 +19,7 @@
           opacity-0
           select-none
           pointer-events-none
+          overflow-hidden
         "
       >
         {{ data.value || data.placeholder || '' }}
