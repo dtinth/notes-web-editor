@@ -69,6 +69,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
             .filter((x) => x.noteId)
             .map((x) => ({ id: x.noteId, label: x.label }))
         })
+        .filter(deduplicate((x: any) => x.id))
       res.json(recent)
       return
     }
@@ -77,5 +78,13 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   } catch (error) {
     console.error(error)
     res.status(500).send(`Error`)
+  }
+}
+
+function deduplicate<T>(f: (element: T) => string): (value: T) => boolean {
+  const seen: { [key: string]: boolean } = {}
+  return (value) => {
+    const key = f(value)
+    return seen[key] === undefined ? (seen[key] = true) : false
   }
 }
