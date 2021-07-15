@@ -21,7 +21,12 @@ const ensureGapiInitialized = pMemoize(async () => {
       client_id:
         '347735770628-lto200027l05noe9tkilnpqnefn9e6g3.apps.googleusercontent.com',
     })
-    .then(() => {})
+    .then(
+      () => {},
+      (error) => {
+        console.error('Unable to initialize gapi.auth2', error)
+      },
+    )
 
   const authInstance = gapi.auth2.getAuthInstance()
   authInstance.currentUser.listen(() => {

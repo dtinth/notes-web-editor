@@ -25,6 +25,7 @@
         {{ data.value || data.placeholder || '' }}
       </div>
       <textarea
+        name="note"
         class="
           absolute
           inset-0
@@ -48,7 +49,7 @@
       />
     </div>
     <div class="mx-2 mb-2 text-right">
-      <Button v-if="data.needsCreation" @click="data.needsCreation?.create"
+      <Button v-if="data.needsCreation" @click="data.needsCreation?.create()"
         >Create Note Locally</Button
       >
     </div>

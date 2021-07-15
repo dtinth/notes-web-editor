@@ -145,7 +145,6 @@ function getNoteViewModel(id: string): { current: ViewModel } {
       readonly: true,
       value: '',
       placeholder: `Creating a new note...`,
-      needsCreation: { create },
     }
     try {
       await db.put({
